@@ -195,16 +195,13 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           GOOS: ${{ matrix.goos }}
           GOARM: ${{ matrix.goarm }}
-        run: |
-          OUT_DIR=dist/pcap-$TARGET
-          mkdir -p $OUT_DIR
-          go build -o $OUT_DIR ./cmd
+        run: go build -o dist/pcap-$TARGET ./cmd
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./dist/pcap-${{ matrix.target }}/pcap
-          asset_name: pcap-${{ matrix.target }}/pcap
+          asset_path: ./dist/pcap-${{ matrix.target }}
+          asset_name: pcap-${{ matrix.target }}
           asset_content_type: application/octet-stream
