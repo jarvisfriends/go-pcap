@@ -8,7 +8,7 @@ jobs:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     outputs:
-      new_tag: ${{ steps.set_output.outputs.new_tag }} # Make the tag an output
+      new_tag: ${{ steps.get_version.outputs.new_tag }} # Make the tag an output
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
           go-version: '1.22'
           cache: true # Enable Go module caching (built into setup-go)
       - name: Get next version
-        id: new_git_tag
+        id: get_version
         run: |
           if [[ -z "$(git tag --points-at HEAD)" ]]; then
             # No tags on this commit, lets increment the existing tag to get a new one
@@ -36,10 +36,7 @@ jobs:
             echo "Error: Failed to get current or generate new tag."
             exit 1
           fi
-          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
-      - name: Set the output
-        id: set_output
-        run: echo "new_tag=${NEW_TAG}" >> $GITHUB_OUTPUT  # This step is for setting the job output variable explicitly
+          echo "new_tag=${NEW_TAG}" >> $GITHUB_OUTPUT
 
   create_release:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
