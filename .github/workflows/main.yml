@@ -24,11 +24,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fetch all history for accurate tag comparison
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+          cache: true # Enable Go module caching (built into setup-go)
       - name: Install dependencies
         run: go mod download
       - name: Run golangci-lint
@@ -39,6 +40,8 @@ jobs:
         run: make vet
       - name: Run unit tests
         run: |
+          # Normally Go unit tests are not ran within a docker container, but we need to test against
+          # a network interface and GitHub doesn't like us to do that directly
           docker run --rm \
           -v ${{ github.workspace }}:/workspace \
           -v ${{ github.workspace }}/go/pkg/mod:/go/pkg/mod \
@@ -82,18 +85,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fetch all history for accurate tag comparison
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+          cache: true # Enable Go module caching (built into setup-go)
       - name: Build binaries
         env:
           TARGET: ${{ matrix.target }}
           GOARCH: ${{ matrix.goarch }}
           GOOS: ${{ matrix.goos }}
           GOARM: ${{ matrix.goarm }}
-        run: |
-          OUT_DIR=dist/pcap-$TARGET
-          mkdir -p $OUT_DIR
-          go build -o $OUT_DIR/pcap ./cmd
+        run: go build -o dist/pcap-$TARGET ./cmd
