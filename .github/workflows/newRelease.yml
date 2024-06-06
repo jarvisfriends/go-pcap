@@ -7,6 +7,8 @@ jobs:
   new_tag:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.set_output.outputs.new_tag }} # Make the tag an output
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,8 +36,10 @@ jobs:
             echo "Error: Failed to get current or generate new tag."
             exit 1
           fi
-          echo "new_tag=$NEW_TAG" >> $GITHUB_ENV  
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+      - name: Set the output
+        id: set_output
+        run: echo "new_tag=${NEW_TAG}" >> $GITHUB_OUTPUT  # This step is for setting the job output variable explicitly
 
   create_release:
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
